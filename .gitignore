@@ -1,0 +1,8 @@
+# Blender install and downloads are not part of the project
+blender-*/
+*.zip
+
+# Blender backups and caches
+*.blend1
+*.blend2
+__pycache__/
