@@ -38,7 +38,7 @@ jobs:
           HUM_GLB_OUT: ${{ github.workspace }}/exports/humanoid_v10.glb
         run: |
           mkdir -p exports
-          blender --background --factory-startup --python humanoid.py
+          blender --background --factory-startup --python-exit-code 1 --python humanoid.py
       - name: Validate GLB structure
         run: node scripts/validate-glb.mjs exports/humanoid_v10.glb
       - name: Check viewer JavaScript syntax
