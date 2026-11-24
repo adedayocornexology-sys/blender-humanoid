@@ -840,6 +840,35 @@ for ob in bpy.data.objects:
     ob.data.materials.append(mat)
 
 # ============================================================================
+# 7B. GAME ASSET EXPORT — preserve modular meshes before the still-render join
+# ============================================================================
+# v10 exports the current procedural sculpture as a static GLB for Three.js
+# inspection. It is intentionally NOT presented as animation-ready: v9's
+# voxel-remeshed body and garments still need a deformation/retopology pass.
+GLB_OUT = os.environ.get(
+    "HUM_GLB_OUT",
+    os.path.join(_SCRIPT_DIR, "exports", "humanoid_v10.glb")
+)
+if os.environ.get("HUM_SKIP_GLB", "0") != "1":
+    os.makedirs(os.path.dirname(os.path.abspath(GLB_OUT)), exist_ok=True)
+    export_meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in export_meshes:
+        ob.select_set(True)
+    if export_meshes:
+        bpy.context.view_layer.objects.active = export_meshes[0]
+        log("exporting %d separate mesh objects to %s" % (len(export_meshes), GLB_OUT))
+        bpy.ops.export_scene.gltf(
+            filepath=GLB_OUT,
+            export_format="GLB",
+            use_selection=True,
+            export_apply=True
+        )
+        log("GLB export complete")
+    else:
+        log("WARNING: no mesh objects available for GLB export")
+
+# ============================================================================
 # 8. JOIN
 # ============================================================================
 log("joining final figure")
