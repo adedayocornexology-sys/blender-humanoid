@@ -66,3 +66,8 @@ The existing v9 body and clothing are voxel-remeshed sculptures. Exporting them 
 4. Profile GLB file size and mesh/triangle counts.
 5. Decide whether to retopologise the body or use a deformation-friendly procedural mesh before adding the armature.
 6. Add idle/walk/run only after deformation tests pass.
+
+
+## Automated build check
+
+The GitHub Actions workflow `.github/workflows/humanoid-preview.yml` builds a fast Blender preview, validates the GLB v2 container and scene geometry, checks the viewer JavaScript syntax, and uploads the GLB/render outputs as a short-lived workflow artifact. This is a structural smoke test; it does not replace visual browser inspection or verify animation.
