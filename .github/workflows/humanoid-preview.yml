@@ -1,0 +1,56 @@
+name: Humanoid GLB preview
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "humanoid.py"
+      - "threejs-test/**"
+      - ".github/workflows/humanoid-preview.yml"
+      - "scripts/validate-glb.mjs"
+  push:
+    branches: [main, "feature/humanoid-v10-threejs-preview"]
+    paths:
+      - "humanoid.py"
+      - "threejs-test/**"
+      - ".github/workflows/humanoid-preview.yml"
+      - "scripts/validate-glb.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender and exporter dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender python3-numpy
+          blender --version
+          python3 -c "import numpy; print('System NumPy:', numpy.__version__)"
+      - name: Generate GLB
+        env:
+          HUM_MODE: form
+          HUM_OUT: ${{ github.workspace }}/ci-renders
+          HUM_GLB_OUT: ${{ github.workspace }}/exports/humanoid_v10.glb
+        run: |
+          mkdir -p exports
+          blender --background --factory-startup --python-exit-code 1 --python humanoid.py
+      - name: Validate GLB structure
+        run: node scripts/validate-glb.mjs exports/humanoid_v10.glb
+      - name: Check viewer JavaScript syntax
+        run: node --input-type=module --check < threejs-test/main.js
+      - name: Upload generated preview files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: humanoid-v10-preview
+          path: |
+            exports/humanoid_v10.glb
+            ci-renders/
+          if-no-files-found: warn
+          retention-days: 7

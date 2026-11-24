@@ -1,0 +1,16 @@
+import fs from "node:fs";
+const file = process.argv[2] ?? "exports/humanoid_v10.glb";
+if (!fs.existsSync(file)) throw new Error(`GLB not found: ${file}`);
+const data = fs.readFileSync(file);
+if (data.length < 20 || data.toString("ascii", 0, 4) !== "glTF") throw new Error("Invalid GLB header");
+const version = data.readUInt32LE(4);
+const declaredLength = data.readUInt32LE(8);
+if (version !== 2) throw new Error(`Expected GLB v2, received v${version}`);
+if (declaredLength !== data.length) throw new Error(`GLB length mismatch: header=${declaredLength}, actual=${data.length}`);
+const jsonLength = data.readUInt32LE(12);
+if (data.toString("ascii", 16, 20) !== "JSON") throw new Error("First GLB chunk is not JSON");
+const gltf = JSON.parse(data.toString("utf8", 20, 20 + jsonLength));
+const meshes = gltf.meshes?.length ?? 0;
+const nodes = gltf.nodes?.length ?? 0;
+if (!meshes || !nodes) throw new Error(`No scene geometry: meshes=${meshes}, nodes=${nodes}`);
+console.log(JSON.stringify({file,bytes:data.length,version,meshes,nodes,materials:gltf.materials?.length??0,scenes:gltf.scenes?.length??0},null,2));

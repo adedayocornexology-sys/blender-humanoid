@@ -131,3 +131,23 @@ blender --background --factory-startup --python humanoid.py
   iterate on shape and lighting.
 - Geometry is deterministic, but denoising and sampling can leave small
   differences between runs.
+
+## Humanoid v10: Three.js game-asset preview
+
+The `feature/humanoid-v10-threejs-preview` branch adds a first game-asset export path. The procedural meshes are exported separately to `exports/humanoid_v10.glb` before the legacy still-render join, and `threejs-test/` provides an interactive Three.js inspection viewer.
+
+Build the GLB with Blender 4.2.1 LTS:
+
+```bash
+blender --background --factory-startup --python humanoid.py
+```
+
+Start a local server from the repository root:
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/threejs-test/`. See [GAME_ASSET_PIPELINE.md](GAME_ASSET_PIPELINE.md) for details and limitations.
+
+**Important:** v10 is currently a static GLB inspection milestone. It does not yet contain an armature, skin weights, UV unwrap or animation. The voxel-remeshed v9 geometry still needs a deformation-friendly topology strategy before it can become a production runner character.
